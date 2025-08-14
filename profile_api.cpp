@@ -26,7 +26,7 @@ namespace tc
             return ProfileVerifyResult::kVfEmptyServerHost;
         }
         auto client =
-                HttpClient::Make(pr_srv_host, pr_srv_port, "/verify/device/info", 2000);
+                HttpClient::MakeSSL(pr_srv_host, pr_srv_port, "/verify/device/info", 2000);
         auto resp = client->Request({
             {"device_id", device_id},
             {"random_pwd_md5", random_pwd_md5.empty() ? "" : random_pwd_md5},
