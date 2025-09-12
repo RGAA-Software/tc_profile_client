@@ -44,7 +44,8 @@ namespace tc
                                                     int pr_srv_port,
                                                     const std::string& device_id,
                                                     const std::string& random_pwd_md5,
-                                                    const std::string& safety_pwd_md5);
+                                                    const std::string& safety_pwd_md5,
+                                                    const std::string& appkey);
     };
 
 }

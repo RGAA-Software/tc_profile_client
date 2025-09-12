@@ -18,7 +18,8 @@ namespace tc
                                                      int pr_srv_port,
                                                      const std::string& device_id,
                                                      const std::string& random_pwd_md5,
-                                                     const std::string& safety_pwd_md5) {
+                                                     const std::string& safety_pwd_md5,
+                                                     const std::string& appkey) {
         if (device_id.empty()) {
             return ProfileVerifyResult::kVfEmptyDeviceId;
         }
@@ -31,6 +32,7 @@ namespace tc
             {"device_id", device_id},
             {"random_pwd_md5", random_pwd_md5.empty() ? "" : random_pwd_md5},
             {"safety_pwd_md5", safety_pwd_md5.empty() ? "" : safety_pwd_md5},
+            {"appkey", appkey}
         });
         if (resp.status != 200 || resp.body.empty()) {
             LOGE("Request new device failed.");
