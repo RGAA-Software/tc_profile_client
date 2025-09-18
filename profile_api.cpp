@@ -27,7 +27,7 @@ namespace tc
             return ProfileVerifyResult::kVfEmptyServerHost;
         }
         auto client =
-                HttpClient::MakeSSL(pr_srv_host, pr_srv_port, "/verify/device/info", 2000);
+                HttpClient::MakeSSL(pr_srv_host, pr_srv_port, "/api/v1/device/control/verify/device/info", 3000);
         auto resp = client->Request({
             {"device_id", device_id},
             {"random_pwd_md5", random_pwd_md5.empty() ? "" : random_pwd_md5},
@@ -35,29 +35,44 @@ namespace tc
             {"appkey", appkey}
         });
         if (resp.status != 200 || resp.body.empty()) {
-            LOGE("Request new device failed.");
-            return ProfileVerifyResult::kVfNetworkFailed;
+            LOGE("VerifyDeviceInfo failed: {}", resp.status);
+            //return ProfileVerifyResult::kVfNetworkFailed;
+            if (resp.status == kERR_PARAM_INVALID) {
+                return ProfileVerifyResult::kVfParamInvalid;
+            }
+            else if (resp.status == kERR_OPERATE_DB_FAILED) {
+                return ProfileVerifyResult::kVfServerInternalError;
+            }
+            else if (resp.status == kERR_DEVICE_NOT_FOUND) {
+                return ProfileVerifyResult::kVfDeviceNotFound;
+            }
+            else if (resp.status == kERR_PASSWORD_FAILED) {
+                return ProfileVerifyResult::kVfPasswordFailed;
+            }
+            else {
+                return ProfileVerifyResult::kVfPasswordFailed;
+            }
         }
 
         try {
             //LOGI("Verify resp: {}", resp.body);
             auto obj = json::parse(resp.body);
-            auto code = obj["code"].get<int>();
-            if (code == kERR_PARAM_INVALID) {
-                return ProfileVerifyResult::kVfParamInvalid;
-            }
-            else if (code == kERR_OPERATE_DB_FAILED) {
-                return ProfileVerifyResult::kVfServerInternalError;
-            }
-            else if (code == kERR_DEVICE_NOT_FOUND) {
-                return ProfileVerifyResult::kVfDeviceNotFound;
-            }
-            else if (code == kERR_PASSWORD_FAILED) {
-                return ProfileVerifyResult::kVfPasswordFailed;
-            }
-            else if (code != 200) {
-                return ProfileVerifyResult::kVfPasswordFailed;
-            }
+//            auto code = obj["code"].get<int>();
+//            if (code == kERR_PARAM_INVALID) {
+//                return ProfileVerifyResult::kVfParamInvalid;
+//            }
+//            else if (code == kERR_OPERATE_DB_FAILED) {
+//                return ProfileVerifyResult::kVfServerInternalError;
+//            }
+//            else if (code == kERR_DEVICE_NOT_FOUND) {
+//                return ProfileVerifyResult::kVfDeviceNotFound;
+//            }
+//            else if (code == kERR_PASSWORD_FAILED) {
+//                return ProfileVerifyResult::kVfPasswordFailed;
+//            }
+//            else if (code != 200) {
+//                return ProfileVerifyResult::kVfPasswordFailed;
+//            }
 
             auto data = obj["data"];
             auto resp_device_id = data["device_id"].get<std::string>();
